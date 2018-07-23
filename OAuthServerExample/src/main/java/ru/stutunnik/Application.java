@@ -17,7 +17,9 @@ import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.filter.OAuth2ClientAuthenticationProcessingFilter;
 import org.springframework.security.oauth2.client.filter.OAuth2ClientContextFilter;
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;
+import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,6 +33,11 @@ import java.util.List;
 
 @SpringBootApplication
 @EnableOAuth2Client
+@EnableAuthorizationServer
+// Can be checked if works with:
+// $ curl acme:acmesecret@localhost:8080/oauth/token -d grant_type=client_credentials
+// or
+// $ curl acme:acmesecret@localhost:8080/oauth/token -d grant_type=password -d username=user -d password={password that is log in on startup}
 @RestController
 public class Application extends WebSecurityConfigurerAdapter {
 
@@ -50,17 +57,24 @@ public class Application extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http
-                .antMatcher("/**")
-
+        http.antMatcher("/**")              // {1}
                 .authorizeRequests()
-                .antMatchers("/", "/login**", "/webjars/**", "/error**").permitAll()
-                .anyRequest().authenticated()
+
+                .antMatchers("/", "/login**", "/webjars/**", "/error**").permitAll() // {2}
+                .anyRequest().authenticated() // {3}
+
+                .and().exceptionHandling()
+                .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/")) // {4}
 
                 .and().logout().logoutSuccessUrl("/").permitAll()
                 .and().csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
 
                 .and().addFilterBefore(ssoFilter(), BasicAuthenticationFilter.class);
+
+//        1	All requests are protected by default
+//        2	The home page and login endpoints are explicitly excluded
+//        3	All other endpoints require an authenticated user
+//        4	Unauthenticated users are re-directed to the home page
     }
 
  /*   private Filter ssoFilter() {
