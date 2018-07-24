@@ -36,9 +36,11 @@
 
 <script type="text/javascript">
     $.get("/user", function (data) {
-        $("#user").html(data.userAuthentication.details.name || data.userAuthentication.details.login);
-        $(".unauthenticated").hide()
-        $(".authenticated").show()
+        if(data && data.name) {
+            $("#user").html(data.name || data.login);
+            $(".unauthenticated").hide();
+            $(".authenticated").show();
+        }
     });
 
     $.ajaxSetup({

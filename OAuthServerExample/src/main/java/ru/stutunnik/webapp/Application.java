@@ -1,15 +1,18 @@
-package ru.stutunnik;
+package ru.stutunnik.webapp;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.UserInfoTokenServices;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.oauth2.client.OAuth2ClientContext;
@@ -19,6 +22,8 @@ import org.springframework.security.oauth2.client.filter.OAuth2ClientContextFilt
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
+import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
+import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
@@ -29,11 +34,14 @@ import org.springframework.web.filter.CompositeFilter;
 import javax.servlet.Filter;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @SpringBootApplication
 @EnableOAuth2Client
 @EnableAuthorizationServer
+//@Order(SecurityProperties.BASIC_AUTH_ORDER)
 // Can be checked if works with:
 // $ curl acme:acmesecret@localhost:8080/oauth/token -d grant_type=client_credentials
 // or
@@ -44,9 +52,11 @@ public class Application extends WebSecurityConfigurerAdapter {
     @Autowired
     OAuth2ClientContext oauth2ClientContext;
 
-    @RequestMapping("/user")
-    public Principal user(Principal principal) {
-        return principal;
+    @RequestMapping({"/user", "/me"})
+    public Map<String, String> user(Principal principal) {
+        Map<String, String> map = new LinkedHashMap<>();
+        map.put("name", principal.getName());
+        return map;
     }
 
     public static void main(String[] args) {
@@ -77,31 +87,6 @@ public class Application extends WebSecurityConfigurerAdapter {
 //        4	Unauthenticated users are re-directed to the home page
     }
 
- /*   private Filter ssoFilter() {
-
-        CompositeFilter filter = new CompositeFilter();
-        List<Filter> filters = new ArrayList<>();
-
-        OAuth2ClientAuthenticationProcessingFilter facebookFilter = new OAuth2ClientAuthenticationProcessingFilter("/login/facebook");
-        OAuth2RestTemplate facebookTemplate = new OAuth2RestTemplate(facebook(), oauth2ClientContext);
-        facebookFilter.setRestTemplate(facebookTemplate);
-        UserInfoTokenServices tokenServices = new UserInfoTokenServices(facebookResource().getUserInfoUri(), facebook().getClientId());
-        tokenServices.setRestTemplate(facebookTemplate);
-        facebookFilter.setTokenServices(tokenServices);
-        filters.add(facebookFilter);
-
-        OAuth2ClientAuthenticationProcessingFilter githubFilter = new OAuth2ClientAuthenticationProcessingFilter("/login/github");
-        OAuth2RestTemplate githubTemplate = new OAuth2RestTemplate(github(), oauth2ClientContext);
-        githubFilter.setRestTemplate(githubTemplate);
-        tokenServices = new UserInfoTokenServices(githubResource().getUserInfoUri(), github().getClientId());
-        tokenServices.setRestTemplate(githubTemplate);
-        githubFilter.setTokenServices(tokenServices);
-        filters.add(githubFilter);
-
-        filter.setFilters(filters);
-        return filter;
-    }*/
-
     private Filter ssoFilter() {
         CompositeFilter filter = new CompositeFilter();
         List<Filter> filters = new ArrayList<>();
@@ -127,25 +112,12 @@ public class Application extends WebSecurityConfigurerAdapter {
     public /*AuthorizationCodeResourceDetails*/ ClientResources facebook() {
         return new ClientResources();
     }
-/*
-    @Bean
-    @ConfigurationProperties("facebook.resource")
-    public ResourceServerProperties facebookResource() {
-        return new ResourceServerProperties();
-    }
-*/
 
     @Bean
     @ConfigurationProperties("github")
     public /*AuthorizationCodeResourceDetails*/ ClientResources github() {
         return new ClientResources();
     }
-/*
-    @Bean
-    @ConfigurationProperties("github.resource")
-    public ResourceServerProperties githubResource() {
-        return new ResourceServerProperties();
-    }*/
 
     @Bean
     public FilterRegistrationBean oauth2ClientFilterRegistration(
@@ -154,6 +126,19 @@ public class Application extends WebSecurityConfigurerAdapter {
         registration.setFilter(filter);
         registration.setOrder(-100);
         return registration;
+    }
+
+
+    @Configuration
+    @EnableResourceServer
+    protected static class ResourceServerConfiguration
+            extends ResourceServerConfigurerAdapter {
+        @Override
+        public void configure(HttpSecurity http) throws Exception {
+            http
+                    .antMatcher("/me")
+                    .authorizeRequests().anyRequest().authenticated();
+        }
     }
 
 }
@@ -177,3 +162,5 @@ class ClientResources {
         return resource;
     }
 }
+
+
