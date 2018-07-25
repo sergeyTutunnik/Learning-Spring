@@ -10,12 +10,12 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import ru.stutunnik.app.service.MyUserDetailsService;
+import ru.stutunnik.app.service.CustomAuthProvider;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -28,6 +28,9 @@ public class BootApplication extends WebSecurityConfigurerAdapter {
     @Autowired
     private MyUserDetailsService userDetailsService;
 
+    @Autowired
+    private CustomAuthProvider customAuthProvider;
+
 
     public static void main(String[] args) {
         SpringApplication.run(BootApplication.class, args);
@@ -35,12 +38,8 @@ public class BootApplication extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
-/*        auth
-                .inMemoryAuthentication()
-                .withUser("q1").password("{noop}1").roles("USER").and()
-                .withUser("admin").password("{noop}1").roles("ADMIN");*/
 
-        auth.userDetailsService(userDetailsService);
+        auth.authenticationProvider(customAuthProvider);
     }
 
     @Override
