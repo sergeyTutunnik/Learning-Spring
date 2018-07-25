@@ -32,6 +32,7 @@ public class CustomAuthProvider implements AuthenticationProvider {
 
 
     public boolean supports(Class<?> aClass) {
-        return true;
+        //return true;
+        return false;
     }
 }
