@@ -19,7 +19,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import ru.stutunnik.app.service.CustomUserDetailsService;
-import ru.stutunnik.app.service.CustomAuthProvider;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -32,10 +31,6 @@ public class BootApplication extends WebSecurityConfigurerAdapter {
     @Autowired
     private CustomUserDetailsService userDetailsService;
 
-    @Autowired
-    private CustomAuthProvider customAuthProvider;
-
-
     public static void main(String[] args) {
         SpringApplication.run(BootApplication.class, args);
     }
@@ -43,16 +38,17 @@ public class BootApplication extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
 
-        // auth.authenticationProvider(customAuthProvider);
-        auth.authenticationProvider(authenticationProvider());
+        //auth.authenticationProvider(customAuthProvider);
+        auth.authenticationProvider(authenticationProvider()); //Setting provider (configured below)
     }
 
+    //Configuring DAO AuthenticationProvider
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider
                 = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService);
-        authProvider.setPasswordEncoder(encoder());
+        authProvider.setUserDetailsService(userDetailsService); // Setting UserDetailsService that returns user data
+        authProvider.setPasswordEncoder(encoder()); // Setting PasswordEncoder(required). Note that password should be stored encoded
         return authProvider;
     }
 

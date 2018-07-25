@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import java.util.Collection;
 import java.util.HashSet;
 
+@Deprecated
 @Component
 public class CustomAuthProvider implements AuthenticationProvider {
 
@@ -33,6 +34,6 @@ public class CustomAuthProvider implements AuthenticationProvider {
 
     public boolean supports(Class<?> aClass) {
         //return true;
-        return false;
+        return true;
     }
 }

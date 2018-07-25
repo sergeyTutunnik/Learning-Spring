@@ -18,7 +18,7 @@ public class UserRepository {
     public UserRepository() {
         //Creating in memory users
 
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(); // Stored passwords should be encoded
 
         GrantedAuthority adminAuth = new SimpleGrantedAuthority("ROLE_ADMIN");
         GrantedAuthority adminAuth2 = new SimpleGrantedAuthority("ADMIN");
