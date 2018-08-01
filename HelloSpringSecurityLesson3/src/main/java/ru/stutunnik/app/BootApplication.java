@@ -19,6 +19,7 @@ import org.springframework.security.web.authentication.logout.SecurityContextLog
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import ru.stutunnik.app.model.UserRepository;
 import ru.stutunnik.app.service.CustomUserDetailsService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -44,6 +45,7 @@ public class BootApplication extends WebSecurityConfigurerAdapter {
         auth.authenticationProvider(authenticationProvider()); //Setting provider (configured below)
     }
 
+    //Configuring DataSource Bean
     @Bean
     public DataSource dataSource() {
 
@@ -55,6 +57,15 @@ public class BootApplication extends WebSecurityConfigurerAdapter {
         );
         dataSource.setDriverClassName("com.mysql.jdbc.Driver");
         return dataSource;
+    }
+
+    //Injecting DataSource dependency into JdbcDAOSupport class via child (UserRepository)
+    @Bean
+    public UserRepository userRepository() {
+
+        UserRepository userRepository = new UserRepository();
+        userRepository.setDataSource(dataSource());
+        return userRepository;
     }
 
     //Configuring DAO AuthenticationProvider

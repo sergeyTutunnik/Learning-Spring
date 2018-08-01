@@ -3,6 +3,7 @@ package ru.stutunnik.app.model;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcDaoSupport;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -18,18 +19,9 @@ import java.util.HashSet;
 import java.util.List;
 
 @Component
-public class UserRepository{
-
-
-    private DataSource dataSource;
-
-    private NamedParameterJdbcTemplate jdbcTemplate;
-
-    @Autowired
-    public void setDataSource(DataSource dataSource) {
-        this.jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
-    }
-
+//Using DAO support class that provides us jdbcTemplate.
+// DataSource injection is provided via configuration(annotation or xml).
+public class UserRepository extends NamedParameterJdbcDaoSupport {
 
     private static final List<User> inMemoryUsers = new ArrayList<>();
 
@@ -65,7 +57,7 @@ public class UserRepository{
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("userName", userName);
 
-        User foundUser = jdbcTemplate.queryForObject(sql, params, new UserRowMapper());
+        User foundUser = this.getNamedParameterJdbcTemplate().queryForObject(sql, params, new UserRowMapper());
 
         return foundUser;
     }
