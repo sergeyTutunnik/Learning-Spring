@@ -89,7 +89,7 @@ public class BootApplication extends WebSecurityConfigurerAdapter {
         http
 
                 .authorizeRequests()
-                .antMatchers("/greet/hi/**").hasRole("ADMIN")  // requests login and permits hi access to 'ADMIN' roles
+                .antMatchers("/greet/hi/**").hasAuthority("admin")  // requests login and permits hi access to 'ADMIN' roles
                 //.antMatchers("/greet/hi/**").authenticated() // requests login
                 .antMatchers("/greet/**").permitAll() // allows unlogined users to access all 'greet' uris
                 .anyRequest().authenticated()
