@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -22,6 +23,7 @@ import ru.stutunnik.app.service.CustomUserDetailsService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.sql.DataSource;
 
 @SpringBootApplication
 @EnableWebSecurity
@@ -40,6 +42,19 @@ public class BootApplication extends WebSecurityConfigurerAdapter {
 
         //auth.authenticationProvider(customAuthProvider);
         auth.authenticationProvider(authenticationProvider()); //Setting provider (configured below)
+    }
+
+    @Bean
+    public DataSource dataSource() {
+
+        DriverManagerDataSource dataSource = new DriverManagerDataSource(
+                //"jbdc:mysql://localhost:3306/auth_db",
+                "jdbc:mysql://localhost:3306/auth_db?serverTimezone=UTC",
+                "root",
+                "12345678"
+        );
+        dataSource.setDriverClassName("com.mysql.jdbc.Driver");
+        return dataSource;
     }
 
     //Configuring DAO AuthenticationProvider
