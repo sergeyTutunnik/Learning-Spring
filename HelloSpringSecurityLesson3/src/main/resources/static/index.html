@@ -9,5 +9,19 @@
 <a href="/greet/hi">hi</a>
 <a href="/greet/hello">hello</a>
 <a href="/logout">logout</a>
+
+<form action="/user/create" method="post">
+
+    <input type="text" name="name" value="Name"/>
+    <input type="text" name="password" value="Password"/>
+    <select name="roles" value="Roles">
+        <option value="admin">ADMIN</option>
+        <option value="user">USER</option>
+        <option value="guest">GUEST</option>
+    </select>
+
+    <input type="submit" value="Add User"/>
+
+</form>
 </body>
 </html>

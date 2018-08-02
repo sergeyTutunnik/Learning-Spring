@@ -1,15 +1,18 @@
 package ru.stutunnik.app.model;
 
+import com.sun.xml.internal.bind.v2.TODO;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcDaoSupport;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import javax.sql.RowSet;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -20,31 +23,30 @@ import java.util.*;
 public class UserRepository extends NamedParameterJdbcDaoSupport {
 
     private static final List<User> inMemoryUsers = new ArrayList<>();
+    BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(); // Stored passwords should be encoded
 
     public UserRepository() {
-        //Creating in memory users
 
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(); // Stored passwords should be encoded
-
-        GrantedAuthority adminAuth = new SimpleGrantedAuthority("ROLE_ADMIN");
-        GrantedAuthority adminAuth2 = new SimpleGrantedAuthority("ADMIN");
-
-        inMemoryUsers.add(new User(
-                1l,
-                "q1",
-                encoder.encode("1"),
-                new HashSet<>()
-        ));
-        inMemoryUsers.add(new User(2l,
-                "admin",
-                encoder.encode("1"),
-                new HashSet<>(Arrays.asList(adminAuth, adminAuth2))
-        ));
     }
 
-    public List<User> finfAllUsers() {
+    public void createUser(User user) {
 
-        return inMemoryUsers;
+        // TODO: 02.08.18 Inside one transaction or Hibernate
+
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("userName", user.getName());
+        params.addValue("userPassword", encoder.encode(user.getPassword()));
+        params.addValue("userAuth", user.getAuthorities().iterator().next().getAuthority());
+
+        int result = this.getNamedParameterJdbcTemplate().update("insert into USERS values (null, :userName, :userPassword);", params);
+
+        int newUserId = this.getNamedParameterJdbcTemplate().queryForObject("select id from users where user_name = :userName", params, Integer.class);
+        int roleId = this.getNamedParameterJdbcTemplate().queryForObject("select role_id from roles where role_sysname = :userAuth", params, Integer.class);
+
+        params.addValue("newUserId",newUserId);
+        params.addValue("roleId",roleId);
+
+        int resultRole = this.getNamedParameterJdbcTemplate().update("insert into USER_ROLES values (null, :roleId, :newUserId)", params);
     }
 
     public User findUserByName(String userName) {

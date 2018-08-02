@@ -92,11 +92,20 @@ public class BootApplication extends WebSecurityConfigurerAdapter {
                 .antMatchers("/greet/hi/**").hasAuthority("admin")  // requests login and permits hi access to 'ADMIN' roles
                 //.antMatchers("/greet/hi/**").authenticated() // requests login
                 .antMatchers("/greet/**").permitAll() // allows unlogined users to access all 'greet' uris
+
+                .antMatchers("/user/**").hasAuthority("admin")
+
                 .anyRequest().authenticated()
-                //.antMatchers("/**").hasRole("ADMIN")  //HAS TO BE ABOVE .anyRequest().authenticated()!!!
+                //.antMatchers("/**").hasRole("ADMIN") !!WRONG!! //HAS TO BE ABOVE .anyRequest().authenticated()!!!
                 .and()
                 .formLogin().and()
-                .httpBasic();
+                .httpBasic().and()
+
+                //Csrf protection is disables for now. By default is enabled in Spring Security,
+                //resulting in 403 error for PATCH,POST,PUT,DELETE requests that does not include csrf token.
+                //Spring MVC <form> tag provides token with CsrfRequestDataValueProcessor, but Spring MVC is not used here.
+                //More info: https://docs.spring.io/autorepo/docs/spring-security/3.2.0.CI-SNAPSHOT/reference/html/csrf.html
+                .csrf().disable();
     }
 
     //Logout endpoint
