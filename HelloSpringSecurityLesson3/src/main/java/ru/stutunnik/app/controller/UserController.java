@@ -15,16 +15,16 @@ import java.util.Set;
 public class UserController {
 
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
     @RequestMapping(value = "/create", method = RequestMethod.POST)
     public String submitCreateUserForm(@ModelAttribute User user,
-                                     @RequestParam Set<String> roles) {
+                                       @RequestParam Set<String> roles) {
 
         // TODO: 02.08.18 Implement custom PropertyEditor for authorities list 
-        if(roles!=null && !roles.isEmpty()){
+        if (roles != null && !roles.isEmpty()) {
             Set<GrantedAuthority> authorities = new HashSet<>();
-            roles.forEach(p->authorities.add(new SimpleGrantedAuthority(p)));
+            roles.forEach(p -> authorities.add(new SimpleGrantedAuthority(p)));
             user.setAuthorities(authorities);
         }
 

@@ -15,7 +15,8 @@ public class DataBaseConfig {
     public DataSource dataSource() {
 
         DriverManagerDataSource dataSource = new DriverManagerDataSource(
-                //"jbdc:mysql://localhost:3306/auth_db",
+
+                // MySql requires serverTimezone to be set in connection url
                 "jdbc:mysql://localhost:3306/auth_db?serverTimezone=UTC",
                 "root",
                 "12345678"

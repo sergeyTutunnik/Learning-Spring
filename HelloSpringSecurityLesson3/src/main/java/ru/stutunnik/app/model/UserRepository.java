@@ -1,18 +1,16 @@
 package ru.stutunnik.app.model;
 
-import com.sun.xml.internal.bind.v2.TODO;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcDaoSupport;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import javax.sql.RowSet;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -22,12 +20,8 @@ import java.util.*;
 // DataSource injection is provided via configuration(annotation or xml).
 public class UserRepository extends NamedParameterJdbcDaoSupport {
 
-    private static final List<User> inMemoryUsers = new ArrayList<>();
-    BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(); // Stored passwords should be encoded
-
-    public UserRepository() {
-
-    }
+    @Autowired
+    private BCryptPasswordEncoder encoder; // Stored passwords should be encoded
 
     public void createUser(User user) {
 
@@ -43,8 +37,8 @@ public class UserRepository extends NamedParameterJdbcDaoSupport {
         int newUserId = this.getNamedParameterJdbcTemplate().queryForObject("select id from users where user_name = :userName", params, Integer.class);
         int roleId = this.getNamedParameterJdbcTemplate().queryForObject("select role_id from roles where role_sysname = :userAuth", params, Integer.class);
 
-        params.addValue("newUserId",newUserId);
-        params.addValue("roleId",roleId);
+        params.addValue("newUserId", newUserId);
+        params.addValue("roleId", roleId);
 
         int resultRole = this.getNamedParameterJdbcTemplate().update("insert into USER_ROLES values (null, :roleId, :newUserId)", params);
     }

@@ -1,9 +1,10 @@
 package ru.stutunnik.app.model;
 
 import org.springframework.security.core.GrantedAuthority;
+
 import java.util.Set;
 
-public class User{
+public class User {
 
     private Long id;
     private String name;
@@ -11,7 +12,7 @@ public class User{
     private Set<GrantedAuthority> authorities;
 
 
-    public User(){
+    public User() {
 
     }
 
